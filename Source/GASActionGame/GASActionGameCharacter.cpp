@@ -82,7 +82,6 @@ void AGASActionGameCharacter::OnRep_PlayerState()
 
 	check(AbilitySystemComponent)
 	AbilitySystemComponent->InitAbilityActorInfo(this, this);
-	
 	InitializeAttributes();
 }
 
@@ -93,9 +92,7 @@ void AGASActionGameCharacter::SetupPlayerInputComponent(class UInputComponent* P
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AGASActionGameCharacter::Move);
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AGASActionGameCharacter::Look);
-
 	}
-
 }
 
 void AGASActionGameCharacter::Move(const FInputActionValue& Value)
@@ -128,6 +125,8 @@ void AGASActionGameCharacter::Look(const FInputActionValue& Value)
 bool AGASActionGameCharacter::ApplyGameplayEffectToSelf(const TSubclassOf<UGameplayEffect> Effect, const FGameplayEffectContextHandle& InEffectContext) const
 {
 	check(AbilitySystemComponent)
+	if (Effect.Get() == nullptr) return false;
+	
 	const FGameplayEffectSpecHandle SpecHandle = AbilitySystemComponent->MakeOutgoingSpec(Effect, 1.f, InEffectContext);
 	if (SpecHandle.IsValid())
 	{
@@ -144,7 +143,7 @@ void AGASActionGameCharacter::InitializeAttributes()
 		FGameplayEffectContextHandle EffectContext = AbilitySystemComponent->MakeEffectContext();
 		EffectContext.AddSourceObject(this);
 
-		AbilitySystemComponent->ApplyGameplayEffectToSelf(DefaultAttributeSet, 1.f, EffectContext);
+		ApplyGameplayEffectToSelf(DefaultAttributeSet, EffectContext);
 	}
 }
 
@@ -152,24 +151,23 @@ void AGASActionGameCharacter::GiveAbilities()
 {
 	if (HasAuthority() && AbilitySystemComponent)
 	{
-		for (TObjectPtr<UGameplayAbility>& Ability : DefaultAbilities)
+		for (const TSubclassOf<UGameplayAbility>& Ability : DefaultAbilities)
 		{
-			FGameplayAbilitySpec AbilitySpec(Ability);
-			AbilitySystemComponent->GiveAbility(AbilitySpec);
+			AbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(Ability));
 		}
 	}
 }
 
 void AGASActionGameCharacter::ApplyStartupEffects()
 {
-	if (HasAuthority() && AbilitySystemComponent)
+	if (HasAuthority() && AbilitySystemComponent && DefaultAttributeSet)
 	{
-		for (TObjectPtr<UGameplayEffect>& Effect : DefaultEffects)
-		{
-			FGameplayEffectContextHandle EffectContext = AbilitySystemComponent->MakeEffectContext();
-			EffectContext.AddSourceObject(this);
+		FGameplayEffectContextHandle EffectContext = AbilitySystemComponent->MakeEffectContext();
+		EffectContext.AddSourceObject(this);
 
-			AbilitySystemComponent->ApplyGameplayEffectToSelf(Effect, 1.f, EffectContext);
+		for (const TSubclassOf<UGameplayEffect>& Effect : DefaultEffects)
+		{
+			ApplyGameplayEffectToSelf(Effect, EffectContext);
 		}
 	}
 }

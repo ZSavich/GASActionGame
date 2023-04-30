@@ -39,21 +39,21 @@ class AGASActionGameCharacter : public ACharacter, public IAbilitySystemInterfac
 
 protected:
 	// Ability System Component used by this character
-	UPROPERTY()
+	UPROPERTY(Transient)
 	UAbilitySystemComponent* AbilitySystemComponent;
 
 	// Attribute set used by this character
-	UPROPERTY()
+	UPROPERTY(Transient)
 	TObjectPtr<const UAGAttributeSetBase> AttributeSet;
 
 	UPROPERTY(EditDefaultsOnly, Category = "GAS")
-	TObjectPtr<UGameplayEffect> DefaultAttributeSet;
+	TSubclassOf<UGameplayEffect> DefaultAttributeSet;
 	
 	UPROPERTY(EditDefaultsOnly, Category = "GAS")
-	TArray<TObjectPtr<UGameplayAbility>> DefaultAbilities;
+	TArray<TSubclassOf<UGameplayAbility>> DefaultAbilities;
 
 	UPROPERTY(EditDefaultsOnly, Category = "GAS")
-	TArray<TObjectPtr<UGameplayEffect>> DefaultEffects;
+	TArray<TSubclassOf<UGameplayEffect>> DefaultEffects;
 
 public:
 	AGASActionGameCharacter();

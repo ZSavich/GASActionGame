@@ -4,11 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "AbilitySystemInterface.h"
+#include "AGTypes.h"
 #include "GameplayEffectTypes.h"
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
 #include "GASActionGameCharacter.generated.h"
 
+class UAGCharacterDataAsset;
 class UGameplayAbility;
 class UAGAbilitySystemComponent;
 class UAGAttributeSetBase;
@@ -39,21 +41,18 @@ class AGASActionGameCharacter : public ACharacter, public IAbilitySystemInterfac
 
 protected:
 	// Ability System Component used by this character
-	UPROPERTY(Transient)
+	UPROPERTY(EditDefaultsOnly, Transient)
 	UAbilitySystemComponent* AbilitySystemComponent;
+
+	UPROPERTY(EditDefaultsOnly, Category = "GAS")
+	TObjectPtr<UAGCharacterDataAsset> CharacterDataAsset;
 
 	// Attribute set used by this character
 	UPROPERTY(Transient)
 	TObjectPtr<const UAGAttributeSetBase> AttributeSet;
 
-	UPROPERTY(EditDefaultsOnly, Category = "GAS")
-	TSubclassOf<UGameplayEffect> DefaultAttributeSet;
-	
-	UPROPERTY(EditDefaultsOnly, Category = "GAS")
-	TArray<TSubclassOf<UGameplayAbility>> DefaultAbilities;
-
-	UPROPERTY(EditDefaultsOnly, Category = "GAS")
-	TArray<TSubclassOf<UGameplayEffect>> DefaultEffects;
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_CharacterData)
+	FCharacterData CharacterData;
 
 public:
 	AGASActionGameCharacter();
@@ -62,11 +61,19 @@ public:
 	
 	virtual void BeginPlay() override;
 	virtual void PossessedBy(AController* NewController) override;
+	virtual void PostInitializeComponents() override;
 
 	virtual void OnRep_PlayerState() override;
 	
+	UFUNCTION()
+	void OnRep_CharacterData();
+
+	void SetCharacterData(const FCharacterData& InCharacterData);
+	
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+	FORCEINLINE FCharacterData GetCharacterData() const { return CharacterData; }
+	
 protected:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	
@@ -74,9 +81,9 @@ protected:
 	void Look(const FInputActionValue& Value);
 
 	bool ApplyGameplayEffectToSelf(const TSubclassOf<UGameplayEffect> Effect, const FGameplayEffectContextHandle& InEffectContext) const;
-	void InitializeAttributes();
 	void GiveAbilities();
 	void ApplyStartupEffects();
-
+	
+	void InitFromCharacterData(const FCharacterData& InCharacterData, const bool bFromReplication = false);
 };
 

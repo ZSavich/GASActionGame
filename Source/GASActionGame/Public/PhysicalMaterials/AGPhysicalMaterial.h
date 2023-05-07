@@ -13,7 +13,7 @@ class GASACTIONGAME_API UAGPhysicalMaterial : public UPhysicalMaterial
 {
 	GENERATED_BODY()
 
-protected:
+public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Sounds")
 	TObjectPtr<USoundBase> FootstepSound;
 };

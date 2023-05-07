@@ -10,6 +10,7 @@
 #include "InputActionValue.h"
 #include "GASActionGameCharacter.generated.h"
 
+class UAGFootstepsComponent;
 class UAGCharacterDataAsset;
 class UGameplayAbility;
 class UAGAbilitySystemComponent;
@@ -42,7 +43,10 @@ class AGASActionGameCharacter : public ACharacter, public IAbilitySystemInterfac
 protected:
 	// Ability System Component used by this character
 	UPROPERTY(EditDefaultsOnly, Transient)
-	UAbilitySystemComponent* AbilitySystemComponent;
+	TObjectPtr<UAbilitySystemComponent> AbilitySystemComponent;
+
+	UPROPERTY(EditDefaultsOnly, Transient)
+	TObjectPtr<UAGFootstepsComponent> FootstepsComponent;
 
 	UPROPERTY(EditDefaultsOnly, Category = "GAS")
 	TObjectPtr<UAGCharacterDataAsset> CharacterDataAsset;
@@ -70,9 +74,10 @@ public:
 
 	void SetCharacterData(const FCharacterData& InCharacterData);
 	
-	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
-	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+	FORCEINLINE USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
+	FORCEINLINE UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 	FORCEINLINE FCharacterData GetCharacterData() const { return CharacterData; }
+	FORCEINLINE UAGFootstepsComponent* GetFootstepsComponent() const { return FootstepsComponent; }
 	
 protected:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;

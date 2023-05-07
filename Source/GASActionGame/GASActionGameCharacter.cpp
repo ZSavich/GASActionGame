@@ -11,6 +11,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "AbilitySystem/AGAttributeSetBase.h"
 #include "AbilitySystem/Components/AGAbilitySystemComponent.h"
+#include "Components/AGFootstepsComponent.h"
 #include "DataAssets/AGCharacterDataAsset.h"
 #include "Net/UnrealNetwork.h"
 
@@ -46,6 +47,8 @@ AGASActionGameCharacter::AGASActionGameCharacter()
 	AbilitySystemComponent->SetReplicationMode(EGameplayEffectReplicationMode::Mixed); // Replicate minimum info to simulate proxies and maximum info to owner and autonomous proxies
 
 	AttributeSet = CreateDefaultSubobject<UAGAttributeSetBase>("AttributeSet");
+
+	FootstepsComponent = CreateDefaultSubobject<UAGFootstepsComponent>("FootstepsComponent");
 }
 
 UAbilitySystemComponent* AGASActionGameCharacter::GetAbilitySystemComponent() const

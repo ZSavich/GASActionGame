@@ -58,6 +58,12 @@ protected:
 	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_CharacterData)
 	FCharacterData CharacterData;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Abilities|Jump")
+	FGameplayTag JumpEventTag;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Abilities|Jump")
+	FGameplayTagContainer InAirTags;
+
 public:
 	AGASActionGameCharacter();
 
@@ -81,9 +87,11 @@ public:
 	
 protected:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	virtual void Landed(const FHitResult& Hit) override;
 	
-	void Move(const FInputActionValue& Value);
-	void Look(const FInputActionValue& Value);
+	void Input_Move(const FInputActionValue& Value);
+	void Input_Look(const FInputActionValue& Value);
+	void Input_Jump(const FInputActionValue& Value);
 
 	bool ApplyGameplayEffectToSelf(const TSubclassOf<UGameplayEffect> Effect, const FGameplayEffectContextHandle& InEffectContext) const;
 	void GiveAbilities();

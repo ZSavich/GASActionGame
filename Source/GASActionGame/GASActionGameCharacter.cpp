@@ -1,6 +1,8 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "GASActionGameCharacter.h"
+
+#include "AbilitySystemBlueprintLibrary.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/InputComponent.h"
@@ -107,14 +109,13 @@ void AGASActionGameCharacter::OnRep_CharacterData()
 void AGASActionGameCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
 {
 	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent)) {
-		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ACharacter::Jump);
-		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
-		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AGASActionGameCharacter::Move);
-		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AGASActionGameCharacter::Look);
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &AGASActionGameCharacter::Input_Jump);
+		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AGASActionGameCharacter::Input_Move);
+		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AGASActionGameCharacter::Input_Look);
 	}
 }
 
-void AGASActionGameCharacter::Move(const FInputActionValue& Value)
+void AGASActionGameCharacter::Input_Move(const FInputActionValue& Value)
 {
 	const FVector2D MovementVector = Value.Get<FVector2D>();
 
@@ -130,7 +131,7 @@ void AGASActionGameCharacter::Move(const FInputActionValue& Value)
 	}
 }
 
-void AGASActionGameCharacter::Look(const FInputActionValue& Value)
+void AGASActionGameCharacter::Input_Look(const FInputActionValue& Value)
 {
 	const FVector2D LookAxisVector = Value.Get<FVector2D>();
 
@@ -138,6 +139,25 @@ void AGASActionGameCharacter::Look(const FInputActionValue& Value)
 	{
 		AddControllerYawInput(LookAxisVector.X);
 		AddControllerPitchInput(LookAxisVector.Y);
+	}
+}
+
+void AGASActionGameCharacter::Input_Jump(const FInputActionValue& Value)
+{
+	FGameplayEventData Payload;
+	Payload.Instigator = this;
+	Payload.EventTag = JumpEventTag;
+		
+	UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(this, JumpEventTag, Payload);
+}
+
+void AGASActionGameCharacter::Landed(const FHitResult& Hit)
+{
+	Super::Landed(Hit);
+
+	if (AbilitySystemComponent)
+	{
+		AbilitySystemComponent->RemoveActiveEffectsWithTags(InAirTags);
 	}
 }
 

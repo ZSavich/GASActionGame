@@ -22,4 +22,10 @@ protected:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Animation", Meta = (BlueprintThreadSafe))
 	UAnimSequence* GetIdleAnimation();
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Animation", Meta = (BlueprintThreadSafe))
+	UBlendSpace* GetCrouchMovementBlendSpace();
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Animation", Meta = (BlueprintThreadSafe))
+	UAnimSequence* GetCrouchIdleAnimation();
 };

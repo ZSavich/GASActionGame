@@ -3,6 +3,7 @@
 #include "GASActionGameCharacter.h"
 
 #include "AbilitySystemBlueprintLibrary.h"
+#include "AbilitySystemLog.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/InputComponent.h"
@@ -112,6 +113,8 @@ void AGASActionGameCharacter::SetupPlayerInputComponent(class UInputComponent* P
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &AGASActionGameCharacter::Input_Jump);
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AGASActionGameCharacter::Input_Move);
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AGASActionGameCharacter::Input_Look);
+		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Started, this, &AGASActionGameCharacter::Input_CrouchStart);
+		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Completed, this, &AGASActionGameCharacter::Input_CrouchEnd);
 	}
 }
 
@@ -151,6 +154,22 @@ void AGASActionGameCharacter::Input_Jump(const FInputActionValue& Value)
 	UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(this, JumpEventTag, Payload);
 }
 
+void AGASActionGameCharacter::Input_CrouchStart(const FInputActionValue& Value)
+{
+	if (AbilitySystemComponent)
+	{
+		AbilitySystemComponent->TryActivateAbilitiesByTag(CrouchTags);
+	}
+}
+
+void AGASActionGameCharacter::Input_CrouchEnd(const FInputActionValue& Value)
+{
+	if (AbilitySystemComponent)
+	{
+		AbilitySystemComponent->CancelAbilities(&CrouchTags);
+	}
+}
+
 void AGASActionGameCharacter::Landed(const FHitResult& Hit)
 {
 	Super::Landed(Hit);
@@ -158,6 +177,37 @@ void AGASActionGameCharacter::Landed(const FHitResult& Hit)
 	if (AbilitySystemComponent)
 	{
 		AbilitySystemComponent->RemoveActiveEffectsWithTags(InAirTags);
+	}
+}
+
+void AGASActionGameCharacter::OnStartCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust)
+{
+	Super::OnStartCrouch(HalfHeightAdjust, ScaledHalfHeightAdjust);
+
+	if (AbilitySystemComponent && CrouchStateEffect)
+	{
+		const FGameplayEffectContextHandle EffectContext = AbilitySystemComponent->MakeEffectContext();
+		if (EffectContext.IsValid())
+		{
+			const FGameplayEffectSpecHandle SpecHandle = AbilitySystemComponent->MakeOutgoingSpec(CrouchStateEffect, 1.f, EffectContext);
+			if (SpecHandle.IsValid())
+			{
+				const FActiveGameplayEffectHandle ActiveEffect = AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
+				if (!ActiveEffect.WasSuccessfullyApplied())
+				{
+					ABILITY_LOG(Error, TEXT("Failed to apply the %s gameplay effect to the character."), *GetNameSafe(CrouchStateEffect));
+				}
+			}
+		}
+	}
+}
+
+void AGASActionGameCharacter::OnEndCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust)
+{
+	Super::OnEndCrouch(HalfHeightAdjust, ScaledHalfHeightAdjust);
+	if (AbilitySystemComponent && CrouchStateEffect)
+	{
+		AbilitySystemComponent->RemoveActiveGameplayEffectBySourceEffect(CrouchStateEffect, AbilitySystemComponent);
 	}
 }
 

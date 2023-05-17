@@ -30,11 +30,17 @@ struct FCharacterAnimData
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditDefaultsOnly, Category = "Character")
+	UPROPERTY(EditDefaultsOnly, Category = "Character|Stand")
 	TObjectPtr<UBlendSpace> MovementBlendSpace;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Character")
+	UPROPERTY(EditDefaultsOnly, Category = "Character|Stand")
 	TObjectPtr<UAnimSequence> IdleAnimation;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Character|Crouch")
+	TObjectPtr<UBlendSpace> CrouchBlendSpace;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Character|Stand")
+	TObjectPtr<UAnimSequence> CrouchIdleAnimation;
 };
 
 UENUM()

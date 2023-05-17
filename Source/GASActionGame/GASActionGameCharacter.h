@@ -40,6 +40,9 @@ class AGASActionGameCharacter : public ACharacter, public IAbilitySystemInterfac
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	class UInputAction* LookAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	class UInputAction* CrouchAction;
+
 protected:
 	// Ability System Component used by this character
 	UPROPERTY(EditDefaultsOnly, Transient)
@@ -63,6 +66,12 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Abilities|Jump")
 	FGameplayTagContainer InAirTags;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Abilities|Crouch")
+	FGameplayTagContainer CrouchTags;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Abilities|Crouch")
+	TSubclassOf<UGameplayEffect> CrouchStateEffect;
 
 public:
 	AGASActionGameCharacter();
@@ -88,10 +97,14 @@ public:
 protected:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void Landed(const FHitResult& Hit) override;
+	virtual void OnStartCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust) override;
+	virtual void OnEndCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust) override;
 	
 	void Input_Move(const FInputActionValue& Value);
 	void Input_Look(const FInputActionValue& Value);
 	void Input_Jump(const FInputActionValue& Value);
+	void Input_CrouchStart(const FInputActionValue& Value);
+	void Input_CrouchEnd(const FInputActionValue& Value);
 
 	bool ApplyGameplayEffectToSelf(const TSubclassOf<UGameplayEffect> Effect, const FGameplayEffectContextHandle& InEffectContext) const;
 	void GiveAbilities();

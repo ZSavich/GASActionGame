@@ -16,32 +16,39 @@ class UGameplayAbility;
 class UAGAbilitySystemComponent;
 class UAGAttributeSetBase;
 class UGameplayEffect;
+class UInputAction;
+class UInputMappingContext;
+class USpringArmComponent;
+class UCameraComponent;
 
 UCLASS(config=Game)
 class AGASActionGameCharacter : public ACharacter, public IAbilitySystemInterface
 {
 	GENERATED_BODY()
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-	class USpringArmComponent* CameraBoom;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<USpringArmComponent> CameraBoom;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-	class UCameraComponent* FollowCamera;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UCameraComponent> FollowCamera;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	class UInputMappingContext* DefaultMappingContext;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UInputMappingContext> DefaultMappingContext;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	class UInputAction* JumpAction;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UInputAction> JumpAction;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	class UInputAction* MoveAction;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UInputAction> MoveAction;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	class UInputAction* LookAction;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UInputAction> LookAction;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	class UInputAction* CrouchAction;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UInputAction> CrouchAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UInputAction> SprintAction;
 
 protected:
 	// Ability System Component used by this character
@@ -72,6 +79,11 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Abilities|Crouch")
 	TSubclassOf<UGameplayEffect> CrouchStateEffect;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Abilities|Sprint")
+	FGameplayTagContainer SprintTags;
+
+	FDelegateHandle OnMaxMovementSpeedChanged;
 
 public:
 	AGASActionGameCharacter();
@@ -105,6 +117,10 @@ protected:
 	void Input_Jump(const FInputActionValue& Value);
 	void Input_CrouchStart(const FInputActionValue& Value);
 	void Input_CrouchEnd(const FInputActionValue& Value);
+	void Input_SprintStart(const FInputActionValue& Value);
+	void Input_SprintEnded(const FInputActionValue& Value);
+
+	void HandleOnMaxMovementSpeedChanged(const FOnAttributeChangeData& MaxMovementSpeedAttribute);
 
 	bool ApplyGameplayEffectToSelf(const TSubclassOf<UGameplayEffect> Effect, const FGameplayEffectContextHandle& InEffectContext) const;
 	void GiveAbilities();

@@ -70,6 +70,11 @@ void AGASActionGameCharacter::BeginPlay()
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
 	}
+
+	if (AbilitySystemComponent)
+	{
+		AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AttributeSet->GetMaxMovementSpeedAttribute()).AddUObject(this, &AGASActionGameCharacter::HandleOnMaxMovementSpeedChanged);
+	}
 }
 
 void AGASActionGameCharacter::PostInitializeComponents()
@@ -115,6 +120,8 @@ void AGASActionGameCharacter::SetupPlayerInputComponent(class UInputComponent* P
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AGASActionGameCharacter::Input_Look);
 		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Started, this, &AGASActionGameCharacter::Input_CrouchStart);
 		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Completed, this, &AGASActionGameCharacter::Input_CrouchEnd);
+		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Started, this, &AGASActionGameCharacter::Input_SprintStart);
+		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Completed, this, &AGASActionGameCharacter::Input_SprintEnded);
 	}
 }
 
@@ -167,6 +174,22 @@ void AGASActionGameCharacter::Input_CrouchEnd(const FInputActionValue& Value)
 	if (AbilitySystemComponent)
 	{
 		AbilitySystemComponent->CancelAbilities(&CrouchTags);
+	}
+}
+
+void AGASActionGameCharacter::Input_SprintStart(const FInputActionValue& Value)
+{
+	if (AbilitySystemComponent)
+	{
+		AbilitySystemComponent->TryActivateAbilitiesByTag(SprintTags);
+	}
+}
+
+void AGASActionGameCharacter::Input_SprintEnded(const FInputActionValue& Value)
+{
+	if (AbilitySystemComponent)
+	{
+		AbilitySystemComponent->CancelAbilities(&SprintTags);
 	}
 }
 
@@ -259,6 +282,14 @@ void AGASActionGameCharacter::SetCharacterData(const FCharacterData& InCharacter
 {
 	CharacterData = InCharacterData;
 	InitFromCharacterData(CharacterData);
+}
+
+void AGASActionGameCharacter::HandleOnMaxMovementSpeedChanged(const FOnAttributeChangeData& MaxMovementSpeedAttribute)
+{
+	if (GetCharacterMovement())
+	{
+		GetCharacterMovement()->MaxWalkSpeed = MaxMovementSpeedAttribute.NewValue;
+	}
 }
 
 void AGASActionGameCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

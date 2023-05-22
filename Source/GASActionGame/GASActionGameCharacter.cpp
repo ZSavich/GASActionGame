@@ -14,11 +14,14 @@
 #include "EnhancedInputSubsystems.h"
 #include "AbilitySystem/AGAttributeSetBase.h"
 #include "AbilitySystem/Components/AGAbilitySystemComponent.h"
+#include "Components/AGCharacterMovementComponent.h"
 #include "Components/AGFootstepsComponent.h"
+#include "Components/AGMotionWarpingComponent.h"
 #include "DataAssets/AGCharacterDataAsset.h"
 #include "Net/UnrealNetwork.h"
 
-AGASActionGameCharacter::AGASActionGameCharacter()
+AGASActionGameCharacter::AGASActionGameCharacter(const FObjectInitializer& ObjectInitializer)
+	:Super(ObjectInitializer.SetDefaultSubobjectClass<UAGCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
 {
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
 		
@@ -52,6 +55,8 @@ AGASActionGameCharacter::AGASActionGameCharacter()
 	AttributeSet = CreateDefaultSubobject<UAGAttributeSetBase>("AttributeSet");
 
 	FootstepsComponent = CreateDefaultSubobject<UAGFootstepsComponent>("FootstepsComponent");
+
+	MotionWarpingComponent = CreateDefaultSubobject<UAGMotionWarpingComponent>("MotionWarpingComponent");
 }
 
 UAbilitySystemComponent* AGASActionGameCharacter::GetAbilitySystemComponent() const
@@ -154,11 +159,13 @@ void AGASActionGameCharacter::Input_Look(const FInputActionValue& Value)
 
 void AGASActionGameCharacter::Input_Jump(const FInputActionValue& Value)
 {
-	FGameplayEventData Payload;
-	Payload.Instigator = this;
-	Payload.EventTag = JumpEventTag;
-		
-	UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(this, JumpEventTag, Payload);
+	if (AbilitySystemComponent)
+	{
+		if (UAGCharacterMovementComponent* CharacterMovementComponent = GetCharacterMovement<UAGCharacterMovementComponent>())
+		{
+			CharacterMovementComponent->TryTraversal(AbilitySystemComponent);
+		}
+	}
 }
 
 void AGASActionGameCharacter::Input_CrouchStart(const FInputActionValue& Value)

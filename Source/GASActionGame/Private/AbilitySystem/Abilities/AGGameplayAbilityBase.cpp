@@ -86,5 +86,5 @@ void UAGGameplayAbilityBase::EndAbility(const FGameplayAbilitySpecHandle Handle,
 
 AGASActionGameCharacter* UAGGameplayAbilityBase::GetActionGameCharacterFromActorInfo() const
 {
-	return Cast<AGASActionGameCharacter>(GetAvatarActorFromActorInfo());
+	return CastChecked<AGASActionGameCharacter>(GetAvatarActorFromActorInfo());
 }

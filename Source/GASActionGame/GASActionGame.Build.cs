@@ -19,6 +19,7 @@ public class GASActionGame : ModuleRules
 			"GameplayAbilities",
 			"GameplayTags",
 			"GameplayTasks",
+			"MotionWarping"
 		});
 		
 		PublicIncludePaths.AddRange(new string[]

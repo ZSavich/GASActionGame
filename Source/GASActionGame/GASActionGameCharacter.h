@@ -10,6 +10,7 @@
 #include "InputActionValue.h"
 #include "GASActionGameCharacter.generated.h"
 
+class UAGMotionWarpingComponent;
 class UAGFootstepsComponent;
 class UAGCharacterDataAsset;
 class UGameplayAbility;
@@ -58,6 +59,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Transient)
 	TObjectPtr<UAGFootstepsComponent> FootstepsComponent;
 
+	UPROPERTY(EditDefaultsOnly, Transient)
+	TObjectPtr<UAGMotionWarpingComponent> MotionWarpingComponent;
+
 	UPROPERTY(EditDefaultsOnly, Category = "GAS")
 	TObjectPtr<UAGCharacterDataAsset> CharacterDataAsset;
 
@@ -86,7 +90,7 @@ protected:
 	FDelegateHandle OnMaxMovementSpeedChanged;
 
 public:
-	AGASActionGameCharacter();
+	AGASActionGameCharacter(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 	
@@ -105,6 +109,7 @@ public:
 	FORCEINLINE UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 	FORCEINLINE FCharacterData GetCharacterData() const { return CharacterData; }
 	FORCEINLINE UAGFootstepsComponent* GetFootstepsComponent() const { return FootstepsComponent; }
+	FORCEINLINE UAGMotionWarpingComponent* GetMotionWarpingComponent() const { return MotionWarpingComponent; }
 	
 protected:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;

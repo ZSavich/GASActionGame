@@ -68,6 +68,7 @@ void UAGGameplayAbility_Jump::ActivateAbility(const FGameplayAbilitySpecHandle H
 			{
 				// Call the Jump on the Character
 				AvatarCharacter->Jump();
+				
 			}
 		}
 	}

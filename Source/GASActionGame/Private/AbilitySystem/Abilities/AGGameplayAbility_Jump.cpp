@@ -1,8 +1,11 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "AbilitySystem/Abilities/AGGameplayAbility_Jump.h"
+
+#include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
 #include "GASActionGameCharacter.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 UAGGameplayAbility_Jump::UAGGameplayAbility_Jump()
 {
@@ -14,6 +17,8 @@ UAGGameplayAbility_Jump::UAGGameplayAbility_Jump()
 	// Don't need unique variables of parameters for each activation.
 	// Only need to be activated by a single actor at a time.
 	InstancingPolicy = EGameplayAbilityInstancingPolicy::NonInstanced;
+
+	OffWallJumpStrength = 100.f;
 }
 
 bool UAGGameplayAbility_Jump::CanActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayTagContainer* SourceTags, const FGameplayTagContainer* TargetTags, FGameplayTagContainer* OptionalRelevantTags) const
@@ -23,10 +28,15 @@ bool UAGGameplayAbility_Jump::CanActivateAbility(const FGameplayAbilitySpecHandl
 		return false;
 	}
 
-	if (const ACharacter* AvatarCharacter = CastChecked<ACharacter>(ActorInfo->AvatarActor.Get()))
+	if (ACharacter* AvatarCharacter = CastChecked<ACharacter>(ActorInfo->AvatarActor.Get()))
 	{
-		return AvatarCharacter->CanJump();
+		const bool bMovementAllowsJump = AvatarCharacter->GetCharacterMovement()->IsJumpAllowed();
+		const UAbilitySystemComponent* AbilitySystemComponent = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(AvatarCharacter);
+		const bool bIsWallRunning = AbilitySystemComponent && AbilitySystemComponent->HasMatchingGameplayTag(WallRunStateTag);
+		
+		return AvatarCharacter->CanJump() || (bMovementAllowsJump && bIsWallRunning);
 	}
+	
 	return false;
 }
 
@@ -44,10 +54,21 @@ void UAGGameplayAbility_Jump::ActivateAbility(const FGameplayAbilitySpecHandle H
 		Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 
 		// Get the actor that activated the ability
-		if (AGASActionGameCharacter* AvatarCharacter = CastChecked<AGASActionGameCharacter>(ActorInfo->AvatarActor))
+		if (AGASActionGameCharacter* AvatarCharacter = CastChecked<AGASActionGameCharacter>(ActorInfo->AvatarActor.Get()))
 		{
-			// Call the Jump on the Character
-			AvatarCharacter->Jump();
+			UAbilitySystemComponent* AbilitySystemComponent = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(AvatarCharacter);
+			if (AbilitySystemComponent && AbilitySystemComponent->HasMatchingGameplayTag(WallRunStateTag))
+			{
+				const FGameplayTagContainer WallRunTags(WallRunStateTag);
+				AbilitySystemComponent->CancelAbilities(&WallRunTags);
+				const FVector JumpOffVector = AvatarCharacter->GetCharacterMovement()->GetCurrentAcceleration().GetSafeNormal() + FVector::UpVector;
+				AvatarCharacter->LaunchCharacter(JumpOffVector * OffWallJumpStrength, true, true);
+			}
+			else
+			{
+				// Call the Jump on the Character
+				AvatarCharacter->Jump();
+			}
 		}
 	}
 }

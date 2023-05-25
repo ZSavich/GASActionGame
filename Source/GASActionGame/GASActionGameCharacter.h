@@ -104,6 +104,7 @@ public:
 	void OnRep_CharacterData();
 
 	void SetCharacterData(const FCharacterData& InCharacterData);
+	bool ApplyGameplayEffectToSelf(const TSubclassOf<UGameplayEffect> Effect, const FGameplayEffectContextHandle& InEffectContext) const;
 	
 	FORCEINLINE USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	FORCEINLINE UCameraComponent* GetFollowCamera() const { return FollowCamera; }
@@ -127,7 +128,6 @@ protected:
 
 	void HandleOnMaxMovementSpeedChanged(const FOnAttributeChangeData& MaxMovementSpeedAttribute);
 
-	bool ApplyGameplayEffectToSelf(const TSubclassOf<UGameplayEffect> Effect, const FGameplayEffectContextHandle& InEffectContext) const;
 	void GiveAbilities();
 	void ApplyStartupEffects();
 	

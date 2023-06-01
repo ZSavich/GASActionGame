@@ -49,3 +49,14 @@ enum EFoot
 	EF_Left		UMETA(DisplayName = "Left"),
 	EF_Right	UMETA(DisplayName = "Right")
 };
+
+UCLASS(BlueprintType, Blueprintable)
+class UItemStaticData : public UObject
+{
+	GENERATED_BODY()
+
+protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	FName ItemName;
+	
+};

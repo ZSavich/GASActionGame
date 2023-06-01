@@ -19,7 +19,8 @@ public class GASActionGame : ModuleRules
 			"GameplayAbilities",
 			"GameplayTags",
 			"GameplayTasks",
-			"MotionWarping"
+			"MotionWarping",
+			"NetCore",
 		});
 		
 		PublicIncludePaths.AddRange(new string[]

@@ -32,6 +32,8 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void OnUnequipped();
+
+	UItemStaticData* GetItemStaticData() const;
 	
 protected:
 	UFUNCTION()

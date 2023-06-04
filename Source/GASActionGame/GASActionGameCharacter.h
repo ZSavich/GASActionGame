@@ -10,6 +10,7 @@
 #include "InputActionValue.h"
 #include "GASActionGameCharacter.generated.h"
 
+class UInventoryComponent;
 class UAGMotionWarpingComponent;
 class UAGFootstepsComponent;
 class UAGCharacterDataAsset;
@@ -61,6 +62,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Transient)
 	TObjectPtr<UAGMotionWarpingComponent> MotionWarpingComponent;
+
+	UPROPERTY(EditDefaultsOnly, Replicated)
+	TObjectPtr<UInventoryComponent> InventoryComponent;
 
 	UPROPERTY(EditDefaultsOnly, Category = "GAS")
 	TObjectPtr<UAGCharacterDataAsset> CharacterDataAsset;

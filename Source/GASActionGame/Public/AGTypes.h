@@ -58,5 +58,7 @@ class UItemStaticData : public UObject
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	FName ItemName;
-	
+
+public:
+	FORCEINLINE const FName& GetItemName() const { return ItemName; }
 };

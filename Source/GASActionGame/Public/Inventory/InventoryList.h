@@ -33,8 +33,11 @@ protected:
 	UPROPERTY()
 	TArray<FInventoryListItem> Items;
 
+public:
 	void AddItem(TSubclassOf<UItemStaticData> InItemDataClass);
 	void RemoveItem(TSubclassOf<UItemStaticData> InItemDataClass);
+
+	FORCEINLINE const TArray<FInventoryListItem>& GetItems() const { return Items; }
 };
 
 template<>

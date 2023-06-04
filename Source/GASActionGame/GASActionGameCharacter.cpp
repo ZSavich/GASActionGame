@@ -17,6 +17,7 @@
 #include "Components/AGCharacterMovementComponent.h"
 #include "Components/AGFootstepsComponent.h"
 #include "Components/AGMotionWarpingComponent.h"
+#include "Components/InventoryComponent.h"
 #include "DataAssets/AGCharacterDataAsset.h"
 #include "Net/UnrealNetwork.h"
 
@@ -57,6 +58,8 @@ AGASActionGameCharacter::AGASActionGameCharacter(const FObjectInitializer& Objec
 	FootstepsComponent = CreateDefaultSubobject<UAGFootstepsComponent>("FootstepsComponent");
 
 	MotionWarpingComponent = CreateDefaultSubobject<UAGMotionWarpingComponent>("MotionWarpingComponent");
+
+	InventoryComponent = CreateDefaultSubobject<UInventoryComponent>("InventoryComponent");
 }
 
 UAbilitySystemComponent* AGASActionGameCharacter::GetAbilitySystemComponent() const
@@ -304,4 +307,5 @@ void AGASActionGameCharacter::GetLifetimeReplicatedProps(TArray<FLifetimePropert
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ThisClass, CharacterData);
+	DOREPLIFETIME(ThisClass, InventoryComponent);
 }

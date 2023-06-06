@@ -46,6 +46,8 @@ void UInventoryComponent::InitializeComponent()
 			InventoryList.AddItem(Item);
 		}
 	}
+
+	EquipItem(InventoryList.GetItems()[0].ItemInstance->ItemStaticDataClass);
 }
 
 bool UInventoryComponent::ReplicateSubobjects(UActorChannel* Channel, FOutBunch* Bunch, FReplicationFlags* RepFlags)
@@ -62,9 +64,61 @@ bool UInventoryComponent::ReplicateSubobjects(UActorChannel* Channel, FOutBunch*
 	return bWroteSomething;
 }
 
+void UInventoryComponent::AddItem(TSubclassOf<UItemStaticData> InItemStaticDataClass)
+{
+	if (InItemStaticDataClass)
+	{
+		InventoryList.AddItem(InItemStaticDataClass);
+	}
+}
+
+void UInventoryComponent::RemoveItem(TSubclassOf<UItemStaticData> InItemStaticDataClass)
+{
+	if (InItemStaticDataClass)
+	{
+		InventoryList.RemoveItem(InItemStaticDataClass);
+	}
+}
+
+void UInventoryComponent::EquipItem(TSubclassOf<UItemStaticData> InItemStaticDataClass)
+{
+	if (GetOwner() && GetOwner()->HasAuthority())
+	{
+		for (const FInventoryListItem& Item : InventoryList.GetItems())
+		{
+			if (Item.ItemInstance->ItemStaticDataClass == InItemStaticDataClass)
+			{
+				EquippedItem = Item.ItemInstance;
+				EquippedItem->OnEquipped(GetOwner());
+				break;
+			}
+		}
+	}
+}
+
+void UInventoryComponent::UnequipItem()
+{
+	if (GetOwner() && GetOwner()->HasAuthority() && EquippedItem)
+	{
+		EquippedItem->OnUnequipped();
+		EquippedItem = nullptr;
+	}
+}
+
+void UInventoryComponent::DropItem()
+{
+	if (GetOwner() && GetOwner()->HasAuthority() && EquippedItem)
+	{
+		EquippedItem->OnDropped();
+		RemoveItem(EquippedItem->ItemStaticDataClass);
+		EquippedItem = nullptr;
+	}
+}
+
 void UInventoryComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ThisClass, InventoryList);
+	DOREPLIFETIME(ThisClass, EquippedItem);
 }

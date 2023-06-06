@@ -5,10 +5,10 @@
 #include "CoreMinimal.h"
 #include "AGTypes.generated.h"
 
+class AItemActor;
 class UAGCharacterAnimDataAsset;
 class UGameplayAbility;
 class UGameplayEffect;
-
 
 USTRUCT(BlueprintType)
 struct FCharacterData
@@ -44,10 +44,18 @@ struct FCharacterAnimData
 };
 
 UENUM()
-enum EFoot
+enum class EFoot : uint8
 {
 	EF_Left		UMETA(DisplayName = "Left"),
 	EF_Right	UMETA(DisplayName = "Right")
+};
+
+UENUM()
+enum class EItemState : uint8
+{
+	EIS_None		UMETA(DisplayName = "None"),
+	EIS_Equipped	UMETA(DisplayName = "Equipped"),
+	EIS_Dropped		UMETA(DisplayName = "Dropped")
 };
 
 UCLASS(BlueprintType, Blueprintable)
@@ -57,8 +65,16 @@ class UItemStaticData : public UObject
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	FName ItemName;
+	FName ItemName = NAME_None;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TSubclassOf<AItemActor> ItemActorClass;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	FName AttachmentSocketName = NAME_None;
 
 public:
 	FORCEINLINE const FName& GetItemName() const { return ItemName; }
+	FORCEINLINE const FName& GetAttachmentSocketName() const { return AttachmentSocketName; }
+	FORCEINLINE const TSubclassOf<AItemActor>& GetItemActorClass() const { return ItemActorClass; }
 };

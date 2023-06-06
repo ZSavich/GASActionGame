@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "InventoryItemInstance.generated.h"
 
+class AItemActor;
 class UItemStaticData;
 
 UCLASS()
@@ -24,14 +25,17 @@ public:
 	UPROPERTY(ReplicatedUsing = "OnRep_IsEquipped")
 	bool bIsEquipped;
 
+protected:
+	UPROPERTY(Replicated)
+	TObjectPtr<AItemActor> ItemActor;
+
 public:
 	virtual void Init(TSubclassOf<UItemStaticData> InItemStaticDataClass);
 	
-	UFUNCTION(BlueprintCallable)
-	void OnEquipped();
-
-	UFUNCTION(BlueprintCallable)
+	void OnEquipped(AActor* OwnerActor = nullptr);
 	void OnUnequipped();
+
+	void OnDropped();
 
 	UItemStaticData* GetItemStaticData() const;
 	

@@ -2,7 +2,10 @@
 
 #include "Inventory/InventoryItemInstance.h"
 
+#include "AGTypes.h"
 #include "InventoryFunctionLibrary.h"
+#include "GameFramework/Character.h"
+#include "Inventory/ItemActor.h"
 #include "Net/UnrealNetwork.h"
 
 void UInventoryItemInstance::Init(TSubclassOf<UItemStaticData> InItemStaticDataClass)
@@ -10,12 +13,46 @@ void UInventoryItemInstance::Init(TSubclassOf<UItemStaticData> InItemStaticDataC
 	ItemStaticDataClass = InItemStaticDataClass;
 }
 
-void UInventoryItemInstance::OnEquipped()
+void UInventoryItemInstance::OnEquipped(AActor* OwnerActor)
 {
+	if (UWorld* World = OwnerActor->GetWorld())
+	{
+		if (const UItemStaticData* ItemStaticData = GetItemStaticData())
+		{
+			if (ItemStaticData->GetItemActorClass())
+			ItemActor = World->SpawnActorDeferred<AItemActor>(ItemStaticData->GetItemActorClass(), FTransform::Identity, OwnerActor);
+			if (ItemActor)
+			{
+				ItemActor->Init(this);
+				ItemActor->FinishSpawning(FTransform::Identity);
+
+				if (const ACharacter* OwnerCharacter = Cast<ACharacter>(OwnerActor))
+				{
+					if (USkeletalMeshComponent* SkeletalMeshComponent = OwnerCharacter->GetMesh())
+					{
+						ItemActor->AttachToComponent(SkeletalMeshComponent, FAttachmentTransformRules::SnapToTargetNotIncludingScale, ItemStaticData->GetAttachmentSocketName());
+					}
+				}
+			}
+		}
+	}
 }
 
 void UInventoryItemInstance::OnUnequipped()
 {
+	if (ItemActor)
+	{
+		ItemActor->Destroy();
+		ItemActor = nullptr;
+	}
+}
+
+void UInventoryItemInstance::OnDropped()
+{
+	if (ItemActor)
+	{
+		ItemActor->OnDropped();
+	}
 }
 
 UItemStaticData* UInventoryItemInstance::GetItemStaticData() const
@@ -33,4 +70,5 @@ void UInventoryItemInstance::GetLifetimeReplicatedProps(TArray<FLifetimeProperty
 
 	DOREPLIFETIME(ThisClass, bIsEquipped);
 	DOREPLIFETIME(ThisClass, ItemStaticDataClass);
+	DOREPLIFETIME(ThisClass, ItemActor);
 }

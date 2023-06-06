@@ -63,7 +63,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Transient)
 	TObjectPtr<UAGMotionWarpingComponent> MotionWarpingComponent;
 
-	UPROPERTY(EditDefaultsOnly, Replicated)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Replicated)
 	TObjectPtr<UInventoryComponent> InventoryComponent;
 
 	UPROPERTY(EditDefaultsOnly, Category = "GAS")

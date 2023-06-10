@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayAbilitySpec.h"
 #include "InventoryItemInstance.generated.h"
 
 class AItemActor;
@@ -29,14 +30,20 @@ protected:
 	UPROPERTY(Replicated)
 	TObjectPtr<AItemActor> ItemActor;
 
+	UPROPERTY()
+	TArray<FGameplayAbilitySpecHandle> GrantedAbilities;
+
 public:
 	virtual void Init(TSubclassOf<UItemStaticData> InItemStaticDataClass);
 	
-	void OnEquipped(AActor* OwnerActor = nullptr);
-	void OnUnequipped();
-	void OnDropped();
+	void OnEquipped(AActor* InOwner = nullptr);
+	void OnUnequipped(AActor* InOwner = nullptr);
+	void OnDropped(AActor* InOwner = nullptr);
 
 	UItemStaticData* GetItemStaticData() const;
+
+	void TryGrantAbilities(AActor* InOwner);
+	void TryRemoveAbilities(AActor* InOwner);
 	
 protected:
 	UFUNCTION()

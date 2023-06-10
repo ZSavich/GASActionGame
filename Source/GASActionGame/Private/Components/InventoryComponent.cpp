@@ -121,7 +121,7 @@ void UInventoryComponent::UnequipItem()
 {
 	if (GetOwner() && GetOwner()->HasAuthority() && EquippedItem)
 	{
-		EquippedItem->OnUnequipped();
+		EquippedItem->OnUnequipped(GetOwner());
 		EquippedItem = nullptr;
 	}
 }
@@ -130,7 +130,7 @@ void UInventoryComponent::DropItem()
 {
 	if (GetOwner() && GetOwner()->HasAuthority() && EquippedItem)
 	{
-		EquippedItem->OnDropped();
+		EquippedItem->OnDropped(GetOwner());
 		RemoveItem(EquippedItem->ItemStaticDataClass);
 		EquippedItem = nullptr;
 	}

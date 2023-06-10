@@ -2,6 +2,8 @@
 
 #include "Inventory/InventoryItemInstance.h"
 
+#include "AbilitySystemBlueprintLibrary.h"
+#include "AbilitySystemComponent.h"
 #include "AGTypes.h"
 #include "InventoryFunctionLibrary.h"
 #include "GameFramework/Character.h"
@@ -13,14 +15,14 @@ void UInventoryItemInstance::Init(TSubclassOf<UItemStaticData> InItemStaticDataC
 	ItemStaticDataClass = InItemStaticDataClass;
 }
 
-void UInventoryItemInstance::OnEquipped(AActor* OwnerActor)
+void UInventoryItemInstance::OnEquipped(AActor* InOwner)
 {
-	if (UWorld* World = OwnerActor->GetWorld())
+	if (UWorld* World = InOwner->GetWorld())
 	{
 		if (const UItemStaticData* ItemStaticData = GetItemStaticData())
 		{
 			if (ItemStaticData->GetItemActorClass())
-			ItemActor = World->SpawnActorDeferred<AItemActor>(ItemStaticData->GetItemActorClass(), FTransform::Identity, OwnerActor);
+			ItemActor = World->SpawnActorDeferred<AItemActor>(ItemStaticData->GetItemActorClass(), FTransform::Identity, InOwner);
 			if (ItemActor)
 			{
 				ItemActor->Init(this);
@@ -29,19 +31,21 @@ void UInventoryItemInstance::OnEquipped(AActor* OwnerActor)
 				bIsEquipped = true;
 				ItemActor->OnEquipped();
 				
-				if (const ACharacter* OwnerCharacter = Cast<ACharacter>(OwnerActor))
+				if (const ACharacter* OwnerCharacter = Cast<ACharacter>(InOwner))
 				{
 					if (USkeletalMeshComponent* SkeletalMeshComponent = OwnerCharacter->GetMesh())
 					{
 						ItemActor->AttachToComponent(SkeletalMeshComponent, FAttachmentTransformRules::SnapToTargetNotIncludingScale, ItemStaticData->GetAttachmentSocketName());
 					}
 				}
+
+				TryGrantAbilities(InOwner);
 			}
 		}
 	}
 }
 
-void UInventoryItemInstance::OnUnequipped()
+void UInventoryItemInstance::OnUnequipped(AActor* InOwner)
 {
 	if (ItemActor)
 	{
@@ -49,20 +53,57 @@ void UInventoryItemInstance::OnUnequipped()
 		ItemActor = nullptr;
 		bIsEquipped = false;
 	}
+
+	TryRemoveAbilities(InOwner);
 }
 
-void UInventoryItemInstance::OnDropped()
+void UInventoryItemInstance::OnDropped(AActor* InOwner)
 {
 	if (ItemActor)
 	{
 		ItemActor->OnDropped();
 		bIsEquipped = false;
 	}
+
+	TryRemoveAbilities(InOwner);
 }
 
 UItemStaticData* UInventoryItemInstance::GetItemStaticData() const
 {
 	return UInventoryFunctionLibrary::GetItemStaticData(ItemStaticDataClass);
+}
+
+void UInventoryItemInstance::TryGrantAbilities(AActor* InOwner)
+{
+	if (InOwner && InOwner->HasAuthority())
+	{
+		if (UAbilitySystemComponent* AbilitySystemComponent = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(InOwner))
+		{
+			if (UItemStaticData* ItemStaticData = GetItemStaticData())
+			{
+				for (const TSubclassOf<UGameplayAbility>& Ability : ItemStaticData->GrantedAbilities)
+				{
+					FGameplayAbilitySpecHandle AbilitySpec = AbilitySystemComponent->K2_GiveAbility(Ability);
+					GrantedAbilities.Add(AbilitySpec);
+				}
+			}
+		}
+	}
+}
+
+void UInventoryItemInstance::TryRemoveAbilities(AActor* InOwner)
+{
+	if (InOwner && InOwner->HasAuthority())
+	{
+		if (UAbilitySystemComponent* AbilitySystemComponent = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(InOwner))
+		{
+			for (FGameplayAbilitySpecHandle AbilityHandle : GrantedAbilities)
+			{
+				AbilitySystemComponent->ClearAbility(AbilityHandle);
+			}
+			GrantedAbilities.Empty();
+		}
+	}
 }
 
 void UInventoryItemInstance::OnRep_IsEquipped()

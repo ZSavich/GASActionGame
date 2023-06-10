@@ -63,6 +63,10 @@ class UItemStaticData : public UObject
 {
 	GENERATED_BODY()
 
+public:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TArray<TSubclassOf<UGameplayAbility>> GrantedAbilities;
+	
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	FName ItemName = NAME_None;
@@ -85,4 +89,21 @@ public:
 	FORCEINLINE const TSubclassOf<AItemActor>& GetItemActorClass() const { return ItemActorClass; }
 	FORCEINLINE bool CanBeEquipped() const { return bCanBeEquipped; }
 	FORCEINLINE const FCharacterAnimData& GetCharacterAnimationData() const { return CharacterAnimationData; }
+};
+
+UCLASS(BlueprintType, Blueprintable)
+class UWeaponStaticData: public UItemStaticData
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TSubclassOf<UGameplayEffect> DamageEffect;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TObjectPtr<USkeletalMesh> SkeletalMesh;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TObjectPtr<UStaticMesh> StaticMesh;
+	
 };

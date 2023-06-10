@@ -42,6 +42,8 @@ void AItemActor::BeginPlay()
 		InteractSphereCollision->SetGenerateOverlapEvents(true);
 
 		InteractSphereCollision->OnComponentBeginOverlap.AddDynamic(this, &ThisClass::OnInteractSphereBeginOverlap);
+
+		InitInternal();
 	}
 	
 }
@@ -148,6 +150,14 @@ void AItemActor::OnRep_ItemState()
 	default:
 		InteractSphereCollision->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 		InteractSphereCollision->SetGenerateOverlapEvents(true);
+	}
+}
+
+void AItemActor::OnRep_ItemInstance(UInventoryItemInstance* OldItemInstance)
+{
+	if (IsValid(ItemInstance) && !IsValid(OldItemInstance))
+	{
+		InitInternal();
 	}
 }
 

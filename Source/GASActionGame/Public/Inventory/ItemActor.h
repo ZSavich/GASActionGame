@@ -17,7 +17,7 @@ class GASACTIONGAME_API AItemActor : public AActor
 	GENERATED_BODY()
 
 protected:
-	UPROPERTY(Replicated)
+	UPROPERTY(ReplicatedUsing = OnRep_ItemInstance)
 	TObjectPtr<UInventoryItemInstance> ItemInstance;
 
 	UPROPERTY(ReplicatedUsing = OnRep_ItemState)
@@ -34,6 +34,7 @@ public:
 	virtual void BeginPlay() override;
 	virtual bool ReplicateSubobjects(UActorChannel* Channel, FOutBunch* Bunch, FReplicationFlags* RepFlags) override;
 	virtual void Init(UInventoryItemInstance* InItemInstance);
+	virtual void InitInternal() {};
 	
 	void OnEquipped();
 	void OnUnequipped();
@@ -45,4 +46,7 @@ public:
 protected:
 	UFUNCTION()
 	void OnRep_ItemState();
+
+	UFUNCTION()
+	void OnRep_ItemInstance(UInventoryItemInstance* OldItemInstance);
 };

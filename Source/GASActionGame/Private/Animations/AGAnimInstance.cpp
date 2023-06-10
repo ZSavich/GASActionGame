@@ -2,10 +2,35 @@
 
 #include "Animations/AGAnimInstance.h"
 #include "GASActionGameCharacter.h"
+#include "Components/InventoryComponent.h"
 #include "DataAssets/AGCharacterAnimDataAsset.h"
+#include "Inventory/InventoryItemInstance.h"
+
+UItemStaticData* UAGAnimInstance::GetEquippedItemStaticData()
+{
+	if (const AGASActionGameCharacter* ActionCharacter = Cast<AGASActionGameCharacter>(GetOwningActor()))
+	{
+		if (const UInventoryComponent* InventoryComponent = ActionCharacter->GetInventoryComponent())
+		{
+			if (const UInventoryItemInstance* EquippedItem = InventoryComponent->GetEquippedItem())
+			{
+				return EquippedItem->GetItemStaticData();
+			}
+		}
+	}
+	return nullptr;
+}
 
 UBlendSpace* UAGAnimInstance::GetMovementBlendSpace()
 {
+	if (const UItemStaticData* ItemStaticData = GetEquippedItemStaticData())
+	{
+		if (ItemStaticData->GetCharacterAnimationData().MovementBlendSpace)
+		{
+			return ItemStaticData->GetCharacterAnimationData().MovementBlendSpace;
+		}
+	}
+	
 	if (const AGASActionGameCharacter* ActionCharacter = Cast<AGASActionGameCharacter>(GetOwningActor()))
 	{
 		if (const UAGCharacterAnimDataAsset* CharacterData = ActionCharacter->GetCharacterData().CharacterAnimationDataAsset)
@@ -21,6 +46,14 @@ UBlendSpace* UAGAnimInstance::GetMovementBlendSpace()
 
 UAnimSequence* UAGAnimInstance::GetIdleAnimation()
 {
+	if (const UItemStaticData* ItemStaticData = GetEquippedItemStaticData())
+	{
+		if (ItemStaticData->GetCharacterAnimationData().IdleAnimation)
+		{
+			return ItemStaticData->GetCharacterAnimationData().IdleAnimation;
+		}
+	}
+	
 	if (const AGASActionGameCharacter* ActionCharacter = Cast<AGASActionGameCharacter>(GetOwningActor()))
 	{
 		if (const UAGCharacterAnimDataAsset* CharacterData = ActionCharacter->GetCharacterData().CharacterAnimationDataAsset)
@@ -36,6 +69,14 @@ UAnimSequence* UAGAnimInstance::GetIdleAnimation()
 
 UBlendSpace* UAGAnimInstance::GetCrouchMovementBlendSpace()
 {
+	if (const UItemStaticData* ItemStaticData = GetEquippedItemStaticData())
+	{
+		if (ItemStaticData->GetCharacterAnimationData().CrouchBlendSpace)
+		{
+			return ItemStaticData->GetCharacterAnimationData().CrouchBlendSpace;
+		}
+	}
+	
 	if (const AGASActionGameCharacter* ActionCharacter = Cast<AGASActionGameCharacter>(GetOwningActor()))
 	{
 		if (const UAGCharacterAnimDataAsset* CharacterData = ActionCharacter->GetCharacterData().CharacterAnimationDataAsset)
@@ -51,6 +92,14 @@ UBlendSpace* UAGAnimInstance::GetCrouchMovementBlendSpace()
 
 UAnimSequence* UAGAnimInstance::GetCrouchIdleAnimation()
 {
+	if (const UItemStaticData* ItemStaticData = GetEquippedItemStaticData())
+	{
+		if (ItemStaticData->GetCharacterAnimationData().CrouchIdleAnimation)
+		{
+			return ItemStaticData->GetCharacterAnimationData().CrouchIdleAnimation;
+		}
+	}
+	
 	if (const AGASActionGameCharacter* ActionCharacter = Cast<AGASActionGameCharacter>(GetOwningActor()))
 	{
 		if (const UAGCharacterAnimDataAsset* CharacterData = ActionCharacter->GetCharacterData().CharacterAnimationDataAsset)

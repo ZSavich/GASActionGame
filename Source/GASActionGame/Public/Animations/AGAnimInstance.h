@@ -6,6 +6,7 @@
 #include "Animation/AnimInstance.h"
 #include "AGAnimInstance.generated.h"
 
+class UItemStaticData;
 class UAGCharacterAnimDataAsset;
 
 UCLASS()
@@ -16,6 +17,9 @@ class GASACTIONGAME_API UAGAnimInstance : public UAnimInstance
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Animation")
 	TObjectPtr<UAGCharacterAnimDataAsset> DefaultCharacterAnimationData;
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Animation", Meta = (BlueprintThreadSafe))
+	UItemStaticData* GetEquippedItemStaticData();
 	
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Animation", Meta = (BlueprintThreadSafe))
 	UBlendSpace* GetMovementBlendSpace();

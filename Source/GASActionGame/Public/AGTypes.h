@@ -76,9 +76,13 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	bool bCanBeEquipped = false;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	FCharacterAnimData CharacterAnimationData;
+
 public:
 	FORCEINLINE const FName& GetItemName() const { return ItemName; }
 	FORCEINLINE const FName& GetAttachmentSocketName() const { return AttachmentSocketName; }
 	FORCEINLINE const TSubclassOf<AItemActor>& GetItemActorClass() const { return ItemActorClass; }
-	FORCEINLINE const bool CanBeEquipped() const { return bCanBeEquipped; }
+	FORCEINLINE bool CanBeEquipped() const { return bCanBeEquipped; }
+	FORCEINLINE const FCharacterAnimData& GetCharacterAnimationData() const { return CharacterAnimationData; }
 };

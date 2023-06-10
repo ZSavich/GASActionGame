@@ -41,6 +41,7 @@ public:
 	void OnDropped(AActor* InOwner = nullptr);
 
 	UItemStaticData* GetItemStaticData() const;
+	AItemActor* GetItemActor() const;
 
 	void TryGrantAbilities(AActor* InOwner);
 	void TryRemoveAbilities(AActor* InOwner);

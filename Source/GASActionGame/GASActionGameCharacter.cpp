@@ -133,6 +133,8 @@ void AGASActionGameCharacter::SetupPlayerInputComponent(class UInputComponent* P
 		EnhancedInputComponent->BindAction(DropAction, ETriggerEvent::Started, this, &AGASActionGameCharacter::Input_Drop);
 		EnhancedInputComponent->BindAction(EquipNextAction, ETriggerEvent::Started, this, &AGASActionGameCharacter::Input_EquipNext);
 		EnhancedInputComponent->BindAction(UnequipAction, ETriggerEvent::Started, this, &AGASActionGameCharacter::Input_Unequip);
+		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Started, this, &AGASActionGameCharacter::Input_AttackStart);
+		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Completed, this, &AGASActionGameCharacter::Input_AttackEnd);
 	}
 }
 
@@ -225,6 +227,20 @@ void AGASActionGameCharacter::Input_Unequip(const FInputActionValue& Value)
 	FGameplayEventData EventData;
 	EventData.EventTag = UInventoryComponent::UnequipTag;
 	UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(this, UInventoryComponent::UnequipTag, EventData);
+}
+
+void AGASActionGameCharacter::Input_AttackStart(const FInputActionValue& Value)
+{
+	FGameplayEventData EventData;
+	EventData.EventTag = AttackStartTag;
+	UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(this, AttackStartTag, EventData);
+}
+
+void AGASActionGameCharacter::Input_AttackEnd(const FInputActionValue& Value)
+{
+	FGameplayEventData EventData;
+	EventData.EventTag = AttackEndTag;
+	UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(this, AttackEndTag, EventData);
 }
 
 void AGASActionGameCharacter::Landed(const FHitResult& Hit)

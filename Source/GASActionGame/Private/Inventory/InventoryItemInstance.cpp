@@ -73,6 +73,11 @@ UItemStaticData* UInventoryItemInstance::GetItemStaticData() const
 	return UInventoryFunctionLibrary::GetItemStaticData(ItemStaticDataClass);
 }
 
+AItemActor* UInventoryItemInstance::GetItemActor() const
+{
+	return ItemActor;
+}
+
 void UInventoryItemInstance::TryGrantAbilities(AActor* InOwner)
 {
 	if (InOwner && InOwner->HasAuthority())

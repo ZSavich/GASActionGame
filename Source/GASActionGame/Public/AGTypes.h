@@ -105,5 +105,11 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TObjectPtr<UStaticMesh> StaticMesh;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	FName MuzzleSocketName = "Muzzle_Socket";
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TObjectPtr<UAnimMontage> AttackMontage;
 	
 };

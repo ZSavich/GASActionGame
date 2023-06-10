@@ -18,5 +18,8 @@ protected:
 public:
 	virtual void InitInternal() override;
 
+	UFUNCTION(BlueprintPure)
+	FVector GetMuzzleLocation() const;
+	
 	UWeaponStaticData* GetWeaponStaticData() const;
 };

@@ -34,6 +34,11 @@ void AWeaponItemActor::InitInternal()
 	}
 }
 
+FVector AWeaponItemActor::GetMuzzleLocation() const
+{
+	return WeaponMeshComponent ? WeaponMeshComponent->GetSocketLocation(GetWeaponStaticData()->MuzzleSocketName) : FVector::Zero();
+}
+
 UWeaponStaticData* AWeaponItemActor::GetWeaponStaticData() const
 {
 	return ItemInstance ? Cast<UWeaponStaticData>(ItemInstance->GetItemStaticData()) : nullptr;

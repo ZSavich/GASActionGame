@@ -35,6 +35,7 @@ protected:
 
 public:
 	void AddItem(TSubclassOf<UItemStaticData> InItemDataClass);
+	void AddItem(UInventoryItemInstance* InInventoryItemInstance);
 	void RemoveItem(TSubclassOf<UItemStaticData> InItemDataClass);
 
 	FORCEINLINE const TArray<FInventoryListItem>& GetItems() const { return Items; }

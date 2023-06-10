@@ -26,37 +26,41 @@ void UAGFootstepsComponent::HandleFootstep(const EFoot& Foot) const
 {
 	UWorld* World = GetWorld();
 	AGASActionGameCharacter* OwnerCharacter = GetOwner<AGASActionGameCharacter>();
-	
+
 	if (World && OwnerCharacter)
 	{
 		if (USkeletalMeshComponent* CharacterMesh = OwnerCharacter->GetMesh())
 		{
 			const bool bShowDebug = CVarShowFootsteps.GetValueOnAnyThread();
-			
-			const FVector FootSocketLocation = CharacterMesh->GetSocketLocation(Foot == EF_Left ? LeftFootSocketName : RightFootSocketName);
+
+			const FVector FootSocketLocation = CharacterMesh->GetSocketLocation(
+				Foot == EFoot::EF_Left ? LeftFootSocketName : RightFootSocketName);
 			const FVector StartTrace = FootSocketLocation + FVector::UpVector * 20.f;
-			const FVector EndTrace = StartTrace + FVector::UpVector * - 50.f;
+			const FVector EndTrace = StartTrace + FVector::UpVector * -50.f;
 
 			FHitResult HitResult;
 
 			FCollisionQueryParams QueryParams;
 			QueryParams.bReturnPhysicalMaterial = true;
 			QueryParams.AddIgnoredActor(OwnerCharacter);
-			
+
 			if (World->LineTraceSingleByChannel(HitResult, StartTrace, EndTrace, ECC_WorldStatic, QueryParams))
 			{
 				if (HitResult.bBlockingHit)
 				{
 					UAGPhysicalMaterial* PhysicalMaterial = Cast<UAGPhysicalMaterial>(HitResult.PhysMaterial.Get());
-					
+
 					if (PhysicalMaterial && PhysicalMaterial->FootstepSound)
 					{
-						UGameplayStatics::PlaySoundAtLocation(OwnerCharacter, PhysicalMaterial->FootstepSound, HitResult.ImpactPoint);
+						UGameplayStatics::PlaySoundAtLocation(OwnerCharacter, PhysicalMaterial->FootstepSound,
+						                                      HitResult.ImpactPoint);
 					}
 
 					if (bShowDebug)
 					{
-						DrawDebugString(World, HitResult.ImpactPoint, FString::Printf(TEXT("Surface: %s"), *GetNameSafe(PhysicalMaterial)), nullptr, FColor::White, 5.f, true);
+						DrawDebugString(World, HitResult.ImpactPoint,
+						                FString::Printf(TEXT("Surface: %s"), *GetNameSafe(PhysicalMaterial)), nullptr,
+						                FColor::White, 5.f, true);
 						DrawDebugSphere(World, HitResult.ImpactPoint, 5.f, 5, FColor::Green, false, 5.f, 0, 1.f);
 					}
 				}

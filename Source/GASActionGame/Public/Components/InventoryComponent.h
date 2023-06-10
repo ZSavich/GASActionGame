@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Abilities/GameplayAbilityTypes.h"
 #include "Components/ActorComponent.h"
 #include "Inventory/InventoryList.h"
 #include "InventoryComponent.generated.h"
@@ -12,6 +13,12 @@ class GASACTIONGAME_API UInventoryComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
+public:
+	static FGameplayTag EquipItemActorTag;
+	static FGameplayTag DropItemTag;
+	static FGameplayTag EquipNextTag;
+	static FGameplayTag UnequipTag;
+	
 protected:
 	UPROPERTY(BlueprintReadOnly, Replicated)
 	FInventoryList InventoryList;
@@ -31,6 +38,19 @@ public:
 	void AddItem(TSubclassOf<UItemStaticData> InItemStaticDataClass);
 	void RemoveItem(TSubclassOf<UItemStaticData> InItemStaticDataClass);
 
+	void AddItemInstance(UInventoryItemInstance* InInventoryItemInstance);
+	void EquipItemInstance(UInventoryItemInstance* InInventoryItemInstance);
+	void EquipNext();
+
+	void GameplayEventCallback(const FGameplayEventData* EventData);
+
+	void AddInventoryTags();
+
+	void HandleGameplayEventInternal(FGameplayEventData EventData);
+
+	UFUNCTION(Server, Reliable)
+	void Server_HandleGameplayEvent(FGameplayEventData EventData);
+	
 	UFUNCTION(BlueprintCallable)
 	void EquipItem(TSubclassOf<UItemStaticData> InItemStaticDataClass);
 

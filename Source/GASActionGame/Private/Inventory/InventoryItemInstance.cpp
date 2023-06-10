@@ -25,7 +25,10 @@ void UInventoryItemInstance::OnEquipped(AActor* OwnerActor)
 			{
 				ItemActor->Init(this);
 				ItemActor->FinishSpawning(FTransform::Identity);
-
+				
+				bIsEquipped = true;
+				ItemActor->OnEquipped();
+				
 				if (const ACharacter* OwnerCharacter = Cast<ACharacter>(OwnerActor))
 				{
 					if (USkeletalMeshComponent* SkeletalMeshComponent = OwnerCharacter->GetMesh())
@@ -44,6 +47,7 @@ void UInventoryItemInstance::OnUnequipped()
 	{
 		ItemActor->Destroy();
 		ItemActor = nullptr;
+		bIsEquipped = false;
 	}
 }
 
@@ -52,6 +56,7 @@ void UInventoryItemInstance::OnDropped()
 	if (ItemActor)
 	{
 		ItemActor->OnDropped();
+		bIsEquipped = false;
 	}
 }
 

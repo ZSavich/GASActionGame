@@ -34,7 +34,6 @@ public:
 	
 	void OnEquipped(AActor* OwnerActor = nullptr);
 	void OnUnequipped();
-
 	void OnDropped();
 
 	UItemStaticData* GetItemStaticData() const;

@@ -73,8 +73,12 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	FName AttachmentSocketName = NAME_None;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	bool bCanBeEquipped = false;
+
 public:
 	FORCEINLINE const FName& GetItemName() const { return ItemName; }
 	FORCEINLINE const FName& GetAttachmentSocketName() const { return AttachmentSocketName; }
 	FORCEINLINE const TSubclassOf<AItemActor>& GetItemActorClass() const { return ItemActorClass; }
+	FORCEINLINE const bool CanBeEquipped() const { return bCanBeEquipped; }
 };

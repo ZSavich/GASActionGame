@@ -52,6 +52,15 @@ class AGASActionGameCharacter : public ACharacter, public IAbilitySystemInterfac
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UInputAction> SprintAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UInputAction> DropAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UInputAction> EquipNextAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UInputAction> UnequipAction;
+
 protected:
 	// Ability System Component used by this character
 	UPROPERTY(EditDefaultsOnly, Transient)
@@ -129,6 +138,9 @@ protected:
 	void Input_CrouchEnd(const FInputActionValue& Value);
 	void Input_SprintStart(const FInputActionValue& Value);
 	void Input_SprintEnded(const FInputActionValue& Value);
+	void Input_Drop(const FInputActionValue& Value);
+	void Input_EquipNext(const FInputActionValue& Value);
+	void Input_Unequip(const FInputActionValue& Value);
 
 	void HandleOnMaxMovementSpeedChanged(const FOnAttributeChangeData& MaxMovementSpeedAttribute);
 

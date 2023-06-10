@@ -3,6 +3,7 @@
 #include "Inventory/ItemActor.h"
 
 #include "AbilitySystemBlueprintLibrary.h"
+#include "Components/InventoryComponent.h"
 #include "Components/SphereComponent.h"
 #include "Engine/ActorChannel.h"
 #include "Net/UnrealNetwork.h"
@@ -13,7 +14,7 @@ AItemActor::AItemActor()
 {
  	PrimaryActorTick.bCanEverTick = false;
 	bReplicates = true;
-
+	
 	InteractSphereCollision = CreateDefaultSubobject<USphereComponent>(TEXT("InteractSphereCollision"));
 	InteractSphereCollision->SetSphereRadius(16.f);
 	InteractSphereCollision->SetCollisionResponseToAllChannels(ECR_Block);
@@ -25,9 +26,24 @@ AItemActor::AItemActor()
 void AItemActor::BeginPlay()
 {
 	Super::BeginPlay();
-
 	check(InteractSphereCollision);
-	InteractSphereCollision->OnComponentBeginOverlap.AddDynamic(this, &ThisClass::OnInteractSphereBeginOverlap);
+	
+	SetReplicateMovement(true);
+	
+	if (HasAuthority())
+	{
+		if (!IsValid(ItemInstance) && IsValid(ItemStaticDataClass))
+		{
+			ItemInstance = NewObject<UInventoryItemInstance>();
+			ItemInstance->Init(ItemStaticDataClass);
+		}
+
+		InteractSphereCollision->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+		InteractSphereCollision->SetGenerateOverlapEvents(true);
+
+		InteractSphereCollision->OnComponentBeginOverlap.AddDynamic(this, &ThisClass::OnInteractSphereBeginOverlap);
+	}
+	
 }
 
 bool AItemActor::ReplicateSubobjects(UActorChannel* Channel, FOutBunch* Bunch, FReplicationFlags* RepFlags)
@@ -48,6 +64,7 @@ void AItemActor::OnEquipped()
 	if (InteractSphereCollision)
 	{
 		InteractSphereCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		InteractSphereCollision->SetGenerateOverlapEvents(false);
 	}
 }
 
@@ -57,6 +74,7 @@ void AItemActor::OnUnequipped()
 	if (InteractSphereCollision)
 	{
 		InteractSphereCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		InteractSphereCollision->SetGenerateOverlapEvents(false);
 	}
 }
 
@@ -96,16 +114,41 @@ void AItemActor::OnDropped()
 		if (InteractSphereCollision)
 		{
 			InteractSphereCollision->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+			InteractSphereCollision->SetGenerateOverlapEvents(true);
 		}
 	}
 }
 
 void AItemActor::OnInteractSphereBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	FGameplayEventData EventData;
-	EventData.OptionalObject = this;
+	if (HasAuthority())
+	{
+		FGameplayEventData EventData;
+		EventData.Instigator = this;
+		EventData.OptionalObject = ItemInstance;
+		EventData.EventTag = UInventoryComponent::EquipItemActorTag;
+		
+		UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(OtherActor, UInventoryComponent::EquipItemActorTag, EventData);
+	}
+}
+
+void AItemActor::OnRep_ItemState()
+{
+	if (!InteractSphereCollision)
+	{
+		return;
+	}
 	
-	UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(OtherActor, OverlapEventTag, EventData);
+	switch (ItemState)
+	{
+	case EItemState::EIS_Equipped:
+		InteractSphereCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		InteractSphereCollision->SetGenerateOverlapEvents(false);
+		
+	default:
+		InteractSphereCollision->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+		InteractSphereCollision->SetGenerateOverlapEvents(true);
+	}
 }
 
 void AItemActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

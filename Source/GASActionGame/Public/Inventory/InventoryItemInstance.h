@@ -33,6 +33,9 @@ protected:
 	UPROPERTY()
 	TArray<FGameplayAbilitySpecHandle> GrantedAbilities;
 
+	UPROPERTY()
+	TArray<FActiveGameplayEffectHandle> OngoingEffectHandles;
+
 public:
 	virtual void Init(TSubclassOf<UItemStaticData> InItemStaticDataClass);
 	
@@ -45,6 +48,9 @@ public:
 
 	void TryGrantAbilities(AActor* InOwner);
 	void TryRemoveAbilities(AActor* InOwner);
+
+	void TryApplyEffects(AActor* InOwner);
+	void TryRemoveEffects(AActor* InOwner);
 	
 protected:
 	UFUNCTION()

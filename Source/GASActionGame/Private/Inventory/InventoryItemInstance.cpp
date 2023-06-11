@@ -1,9 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Inventory/InventoryItemInstance.h"
-
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
+#include "AbilitySystemLog.h"
 #include "AGTypes.h"
 #include "InventoryFunctionLibrary.h"
 #include "GameFramework/Character.h"
@@ -40,6 +40,7 @@ void UInventoryItemInstance::OnEquipped(AActor* InOwner)
 				}
 
 				TryGrantAbilities(InOwner);
+				TryApplyEffects(InOwner);
 			}
 		}
 	}
@@ -55,6 +56,7 @@ void UInventoryItemInstance::OnUnequipped(AActor* InOwner)
 	}
 
 	TryRemoveAbilities(InOwner);
+	TryRemoveEffects(InOwner);
 }
 
 void UInventoryItemInstance::OnDropped(AActor* InOwner)
@@ -66,6 +68,7 @@ void UInventoryItemInstance::OnDropped(AActor* InOwner)
 	}
 
 	TryRemoveAbilities(InOwner);
+	TryRemoveEffects(InOwner);
 }
 
 UItemStaticData* UInventoryItemInstance::GetItemStaticData() const
@@ -107,6 +110,58 @@ void UInventoryItemInstance::TryRemoveAbilities(AActor* InOwner)
 				AbilitySystemComponent->ClearAbility(AbilityHandle);
 			}
 			GrantedAbilities.Empty();
+		}
+	}
+}
+
+void UInventoryItemInstance::TryApplyEffects(AActor* InOwner)
+{
+	if (InOwner)
+	{
+		if (UAbilitySystemComponent* AbilitySystemComponent = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(InOwner))
+		{
+			FGameplayEffectContextHandle EffectContext = AbilitySystemComponent->MakeEffectContext();
+			UItemStaticData* ItemStaticData = GetItemStaticData();
+			if (EffectContext.IsValid() && IsValid(ItemStaticData))
+			{
+				for (const TSubclassOf<UGameplayEffect>& Effect : ItemStaticData->OngoingEffects)
+				{
+					if (Effect.Get())
+					{
+						FGameplayEffectSpecHandle SpecHandle = AbilitySystemComponent->MakeOutgoingSpec(Effect, 1.f, EffectContext);
+						if (SpecHandle.IsValid())
+						{
+							FActiveGameplayEffectHandle ActiveEffectHandle = AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
+							if (ActiveEffectHandle.WasSuccessfullyApplied())
+							{
+								OngoingEffectHandles.Add(ActiveEffectHandle);
+							}
+							else
+							{
+								ABILITY_LOG(Error, TEXT("Failed to Apply %s Gameplay Effect."), *GetNameSafe(Effect));
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+void UInventoryItemInstance::TryRemoveEffects(AActor* InOwner)
+{
+	if (InOwner)
+	{
+		if (UAbilitySystemComponent* AbilitySystemComponent = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(InOwner))
+		{
+			for (const FActiveGameplayEffectHandle& ActiveEffect : OngoingEffectHandles)
+			{
+				if (ActiveEffect.IsValid())
+				{
+					AbilitySystemComponent->RemoveActiveGameplayEffect(ActiveEffect);
+				}
+			}
+			OngoingEffectHandles.Empty();
 		}
 	}
 }

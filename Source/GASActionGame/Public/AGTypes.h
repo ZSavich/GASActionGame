@@ -58,6 +58,14 @@ enum class EItemState : uint8
 	EIS_Dropped		UMETA(DisplayName = "Dropped")
 };
 
+UENUM()
+enum class EMovementDirectionType : uint8
+{
+	EMDT_None				UMETA(DisplayName = "None"),
+	EMDT_OrientToMovement	UMETA(DisplayName = "OrientToMovement"),
+	EMDT_Strafe				UMETA(DisplayName = "Strafe")
+};
+
 UCLASS(BlueprintType, Blueprintable)
 class UItemStaticData : public UObject
 {
@@ -66,6 +74,9 @@ class UItemStaticData : public UObject
 public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TArray<TSubclassOf<UGameplayAbility>> GrantedAbilities;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TArray<TSubclassOf<UGameplayEffect>> OngoingEffects;
 	
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)

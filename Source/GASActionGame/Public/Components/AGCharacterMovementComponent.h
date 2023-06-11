@@ -18,6 +18,22 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Abilities")
 	TArray<TSubclassOf<UGameplayAbility>> TraversalAbilities;
 
+	EMovementDirectionType MovementDirectionType;
+
 public:
+	virtual void BeginPlay() override;
+
 	bool TryTraversal(UAbilitySystemComponent* AbilitySystemComponent);
+
+	UFUNCTION(BlueprintPure)
+	EMovementDirectionType GetMovementDirectionType() const;
+
+	UFUNCTION(BlueprintCallable)
+	void SetMovementDirectionType(const EMovementDirectionType InMovementDirectionType);
+
+protected:
+	UFUNCTION()
+	void OnEnforcedStrafeTagChanged(const FGameplayTag CallbackTag, int32 NewCount);
+	
+	void HandleMovementDirection();
 };

@@ -14,4 +14,7 @@ class GASACTIONGAME_API UAGGameplayAbility_Combat : public UAGGameplayAbility_In
 public:
 	UFUNCTION(BlueprintPure)
 	FGameplayEffectSpecHandle GetWeaponEffectSpec(const FHitResult& HitResult) const;
+
+	UFUNCTION(BlueprintPure)
+	bool GetWeaponToFocusTraceResult(const float TraceDistance, const ETraceTypeQuery TraceType, FHitResult& OutHitResult) const;
 };

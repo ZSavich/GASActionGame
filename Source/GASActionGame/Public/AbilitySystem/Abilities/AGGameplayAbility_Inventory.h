@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Abilities/GameplayAbility.h"
+#include "AGGameplayAbilityBase.h"
 #include "AGGameplayAbility_Inventory.generated.h"
 
 class AItemActor;
@@ -14,7 +14,7 @@ class UInventoryItemInstance;
 class UInventoryComponent;
 
 UCLASS()
-class GASACTIONGAME_API UAGGameplayAbility_Inventory : public UGameplayAbility
+class GASACTIONGAME_API UAGGameplayAbility_Inventory : public UAGGameplayAbilityBase
 {
 	GENERATED_BODY()
 

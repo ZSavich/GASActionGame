@@ -63,6 +63,9 @@ class AGASActionGameCharacter : public ACharacter, public IAbilitySystemInterfac
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UInputAction> AttackAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UInputAction> AimAction;
 	
 protected:
 	// Ability System Component used by this character
@@ -109,6 +112,12 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Abilities|Weapon")
 	FGameplayTag AttackEndTag;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Abilities|Weapon")
+	FGameplayTag AimStartTag;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Abilities|Weapon")
+	FGameplayTag AimEndTag;
+
 	FDelegateHandle OnMaxMovementSpeedChanged;
 
 public:
@@ -153,6 +162,8 @@ protected:
 	void Input_Unequip(const FInputActionValue& Value);
 	void Input_AttackStart(const FInputActionValue& Value);
 	void Input_AttackEnd(const FInputActionValue& Value);
+	void Input_AimStart(const FInputActionValue& Value);
+	void Input_AimEnd(const FInputActionValue& Value);
 	
 	void HandleOnMaxMovementSpeedChanged(const FOnAttributeChangeData& MaxMovementSpeedAttribute);
 

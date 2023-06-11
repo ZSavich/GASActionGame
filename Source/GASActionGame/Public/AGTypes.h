@@ -123,4 +123,6 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TObjectPtr<UAnimMontage> AttackMontage;
 	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	float FireRate;
 };

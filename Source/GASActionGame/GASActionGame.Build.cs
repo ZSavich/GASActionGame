@@ -21,6 +21,7 @@ public class GASActionGame : ModuleRules
 			"GameplayTasks",
 			"MotionWarping",
 			"NetCore",
+			"Niagara",
 		});
 		
 		PublicIncludePaths.AddRange(new string[]

@@ -22,4 +22,13 @@ public:
 	FVector GetMuzzleLocation() const;
 	
 	UWeaponStaticData* GetWeaponStaticData() const;
+
+	UFUNCTION(BlueprintCallable)
+	void PlayWeaponEffects(const FHitResult& InHitResult);
+
+protected:
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlayWeaponEffects(const FHitResult& InHitResult);
+
+	void PlayWeaponEffectsInternal(const FHitResult& InHitResult) const;
 };

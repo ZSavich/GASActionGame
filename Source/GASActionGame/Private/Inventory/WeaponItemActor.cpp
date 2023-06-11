@@ -2,6 +2,9 @@
 
 #include "Inventory/WeaponItemActor.h"
 #include "Inventory/InventoryItemInstance.h"
+#include "Kismet/GameplayStatics.h"
+#include "PhysicalMaterials/AGPhysicalMaterial.h"
+#include "NiagaraFunctionLibrary.h"
 
 void AWeaponItemActor::InitInternal()
 {
@@ -42,4 +45,41 @@ FVector AWeaponItemActor::GetMuzzleLocation() const
 UWeaponStaticData* AWeaponItemActor::GetWeaponStaticData() const
 {
 	return ItemInstance ? Cast<UWeaponStaticData>(ItemInstance->GetItemStaticData()) : nullptr;
+}
+
+void AWeaponItemActor::PlayWeaponEffects(const FHitResult& InHitResult)
+{
+	if (HasAuthority())
+	{
+		Multicast_PlayWeaponEffects(InHitResult);
+	}
+	else
+	{
+		PlayWeaponEffectsInternal(InHitResult);
+	}
+}
+
+void AWeaponItemActor::Multicast_PlayWeaponEffects_Implementation(const FHitResult& InHitResult)
+{
+	if (!Owner || Owner->GetLocalRole() != ENetRole::ROLE_Authority)
+	{
+		PlayWeaponEffectsInternal(InHitResult);
+	}
+}
+
+void AWeaponItemActor::PlayWeaponEffectsInternal(const FHitResult& InHitResult) const
+{
+	if (InHitResult.PhysMaterial.IsValid())
+	{
+		if (const UAGPhysicalMaterial* PhysicMaterial = Cast<UAGPhysicalMaterial>(InHitResult.PhysMaterial.Get()))
+		{
+			UGameplayStatics::PlaySoundAtLocation(this, PhysicMaterial->PointImpactSound, InHitResult.ImpactPoint);
+			UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, PhysicMaterial->PointImpactVFX, InHitResult.ImpactPoint);
+		}
+
+		if (const UWeaponStaticData* WeaponStaticData = GetWeaponStaticData())
+		{
+			UGameplayStatics::PlaySoundAtLocation(this, WeaponStaticData->AttackSound, GetMuzzleLocation());
+		}
+	}
 }

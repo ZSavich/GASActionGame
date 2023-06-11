@@ -85,9 +85,9 @@ void AGASActionGameCharacter::BeginPlay()
 	}
 }
 
-void AGASActionGameCharacter::PostInitializeComponents()
+void AGASActionGameCharacter::PostLoad()
 {
-	Super::PostInitializeComponents();
+	Super::PostLoad();
 
 	if (CharacterDataAsset)
 	{

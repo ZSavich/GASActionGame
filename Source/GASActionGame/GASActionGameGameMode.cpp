@@ -1,7 +1,7 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "GASActionGameGameMode.h"
-#include "GASActionGameCharacter.h"
+#include "AGPlayerController.h"
 #include "UObject/ConstructorHelpers.h"
 
 AGASActionGameGameMode::AGASActionGameGameMode()
@@ -11,5 +11,16 @@ AGASActionGameGameMode::AGASActionGameGameMode()
 	if (PlayerPawnBPClass.Class != NULL)
 	{
 		DefaultPawnClass = PlayerPawnBPClass.Class;
+	}
+	PlayerControllerClass = AAGPlayerController::StaticClass();
+	
+	RestartPlayerTime = 2.f;
+}
+
+void AGASActionGameGameMode::NotifyPlayerDied(AAGPlayerController* Controller) const
+{
+	if (Controller)
+	{
+		Controller->RestartPlayerIn(RestartPlayerTime);
 	}
 }

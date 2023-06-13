@@ -12,6 +12,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "GameplayEffectExtension.h"
 #include "AbilitySystem/AGAttributeSetBase.h"
 #include "AbilitySystem/Components/AGAbilitySystemComponent.h"
 #include "Components/AGCharacterMovementComponent.h"
@@ -60,6 +61,9 @@ AGASActionGameCharacter::AGASActionGameCharacter(const FObjectInitializer& Objec
 	MotionWarpingComponent = CreateDefaultSubobject<UAGMotionWarpingComponent>("MotionWarpingComponent");
 
 	InventoryComponent = CreateDefaultSubobject<UInventoryComponent>("InventoryComponent");
+
+	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AttributeSet->GetHealthAttribute()).AddUObject(this, &ThisClass::HandleOnHealthAttributeChanged);
+	AbilitySystemComponent->RegisterGameplayTagEvent(FGameplayTag::RequestGameplayTag("State.Ragdoll", EGameplayTagEventType::NewOrRemoved)).AddUObject(this, &ThisClass::OnRagdollStateTagChanged);
 }
 
 UAbilitySystemComponent* AGASActionGameCharacter::GetAbilitySystemComponent() const
@@ -342,6 +346,49 @@ void AGASActionGameCharacter::ApplyStartupEffects()
 void AGASActionGameCharacter::InitFromCharacterData(const FCharacterData& InCharacterData, const bool bFromReplication)
 {
 	// ToDo
+}
+
+void AGASActionGameCharacter::StartRagdoll()
+{
+	if (USkeletalMeshComponent* SkeletalMeshComponent = GetMesh())
+	{
+		if (!SkeletalMeshComponent->IsSimulatingPhysics())
+		{
+			SkeletalMeshComponent->SetCollisionProfileName("Ragdoll");
+			SkeletalMeshComponent->SetSimulatePhysics(true);
+			SkeletalMeshComponent->SetAllPhysicsLinearVelocity(FVector::ZeroVector);
+			SkeletalMeshComponent->SetAllPhysicsAngularVelocityInDegrees(FVector::ZeroVector);
+			SkeletalMeshComponent->WakeAllRigidBodies();
+
+			GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		}
+	}
+}
+
+void AGASActionGameCharacter::OnRagdollStateTagChanged(const FGameplayTag CallbackTag, int32 NewCount)
+{
+	if (NewCount > 0)
+	{
+		StartRagdoll();
+	}
+}
+
+void AGASActionGameCharacter::HandleOnHealthAttributeChanged(const FOnAttributeChangeData& HealthAttribute)
+{
+	if (HealthAttribute.NewValue <= 0 && HealthAttribute.OldValue > 0)
+	{
+		if (HealthAttribute.GEModData)
+		{
+			// The example how to get the player that damaged the character and killed hit
+			const FGameplayEffectContextHandle& EffectContext = HealthAttribute.GEModData->EffectSpec.GetEffectContext();
+			AActor* Killer = EffectContext.GetInstigator();
+		}
+
+		FGameplayEventData EventData;
+		EventData.EventTag = ZeroHealthEventTag;
+
+		UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(this, ZeroHealthEventTag, EventData);
+	}
 }
 
 void AGASActionGameCharacter::SetCharacterData(const FCharacterData& InCharacterData)

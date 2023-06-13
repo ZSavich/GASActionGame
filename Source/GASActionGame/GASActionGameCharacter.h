@@ -33,7 +33,7 @@ class AGASActionGameCharacter : public ACharacter, public IAbilitySystemInterfac
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UCameraComponent> FollowCamera;
-	
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UInputMappingContext> DefaultMappingContext;
 
@@ -60,13 +60,13 @@ class AGASActionGameCharacter : public ACharacter, public IAbilitySystemInterfac
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UInputAction> UnequipAction;
-	
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UInputAction> AttackAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UInputAction> AimAction;
-	
+
 protected:
 	// Ability System Component used by this character
 	UPROPERTY(EditDefaultsOnly, Transient)
@@ -118,38 +118,45 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Abilities|Weapon")
 	FGameplayTag AimEndTag;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Abilities|Death")
+	FGameplayTag ZeroHealthEventTag;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Abilities|Death")
+	FGameplayTag RagdollStateTag;
+
 	FDelegateHandle OnMaxMovementSpeedChanged;
 
 public:
 	AGASActionGameCharacter(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
-	
+
 	virtual void BeginPlay() override;
 	virtual void PossessedBy(AController* NewController) override;
 	virtual void PostLoad() override;
 
 	virtual void OnRep_PlayerState() override;
-	
+
 	UFUNCTION()
 	void OnRep_CharacterData();
 
 	void SetCharacterData(const FCharacterData& InCharacterData);
-	bool ApplyGameplayEffectToSelf(const TSubclassOf<UGameplayEffect> Effect, const FGameplayEffectContextHandle& InEffectContext) const;
-	
+	bool ApplyGameplayEffectToSelf(const TSubclassOf<UGameplayEffect> Effect,
+	                               const FGameplayEffectContextHandle& InEffectContext) const;
+
 	FORCEINLINE USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	FORCEINLINE UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 	FORCEINLINE FCharacterData GetCharacterData() const { return CharacterData; }
 	FORCEINLINE UAGFootstepsComponent* GetFootstepsComponent() const { return FootstepsComponent; }
 	FORCEINLINE UAGMotionWarpingComponent* GetMotionWarpingComponent() const { return MotionWarpingComponent; }
 	FORCEINLINE UInventoryComponent* GetInventoryComponent() const { return InventoryComponent; }
-	
+
 protected:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void Landed(const FHitResult& Hit) override;
 	virtual void OnStartCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust) override;
 	virtual void OnEndCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust) override;
-	
+
 	void Input_Move(const FInputActionValue& Value);
 	void Input_Look(const FInputActionValue& Value);
 	void Input_Jump(const FInputActionValue& Value);
@@ -164,12 +171,19 @@ protected:
 	void Input_AttackEnd(const FInputActionValue& Value);
 	void Input_AimStart(const FInputActionValue& Value);
 	void Input_AimEnd(const FInputActionValue& Value);
-	
+
 	void HandleOnMaxMovementSpeedChanged(const FOnAttributeChangeData& MaxMovementSpeedAttribute);
+	void HandleOnHealthAttributeChanged(const FOnAttributeChangeData& HealthAttribute);
 
 	void GiveAbilities();
 	void ApplyStartupEffects();
-	
-	void InitFromCharacterData(const FCharacterData& InCharacterData, const bool bFromReplication = false);
-};
 
+	void InitFromCharacterData(const FCharacterData& InCharacterData, const bool bFromReplication = false);
+
+	/** Death Ability Handle */
+	void StartRagdoll();
+
+	UFUNCTION()
+	void OnRagdollStateTagChanged(const FGameplayTag CallbackTag, int32 NewCount);
+
+};

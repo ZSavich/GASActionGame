@@ -13,7 +13,7 @@ void AAGPlayerController::OnPossess(APawn* InPawn)
 	if (UAbilitySystemComponent* AbilitySystemComponent = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(InPawn))
 	{
 		AbilitySystemComponent->RegisterGameplayTagEvent(FGameplayTag::RequestGameplayTag("State.Dead", EGameplayTagEventType::NewOrRemoved)).AddUObject(this, &AAGPlayerController::OnPawnDeathStateChanged);
-	}
+	} 
 }
 
 void AAGPlayerController::OnUnPossess()

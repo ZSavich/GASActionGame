@@ -71,5 +71,6 @@ void UAGGameplayAbility_Jump::ActivateAbility(const FGameplayAbilitySpecHandle H
 				
 			}
 		}
+		K2_EndAbility();
 	}
 }

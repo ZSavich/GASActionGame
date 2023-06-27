@@ -5,6 +5,8 @@
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Net/UnrealNetwork.h"
+#include "UI/AGHUD.h"
+#include "ViewModels/VMCharacterHealth.h"
 
 void UAGAttributeSetBase::PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data)
 {
@@ -13,6 +15,30 @@ void UAGAttributeSetBase::PostGameplayEffectExecute(const FGameplayEffectModCall
 	if (Data.EvaluatedData.Attribute == GetHealthAttribute())
 	{
 		SetHealth(FMath::Clamp(GetHealth(), 0.f, GetMaxHealth()));
+		
+		if (HealthViewModel)
+		{
+			HealthViewModel->SetCurrentHealth(Health.GetCurrentValue());
+		}
+		else
+		{
+			if (const AActor* Owner = GetOwningActor())
+			{
+				if (const APlayerController* Controller = Owner->GetInstigatorController<APlayerController>())
+				{
+					if (const AAGHUD* HUD = Controller->GetHUD<AAGHUD>())
+					{
+						HealthViewModel = HUD->CharacterHealthViewModel;
+					}
+				}
+			}
+			// Set Default Values to the Health View Model
+			if (HealthViewModel)
+			{
+				HealthViewModel->SetMaxHealth(MaxHealth.GetCurrentValue());
+				HealthViewModel->SetCurrentHealth(Health.GetCurrentValue());
+			}
+		}
 	}
 	if (Data.EvaluatedData.Attribute == GetMaxMovementSpeedAttribute())
 	{

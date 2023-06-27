@@ -13,6 +13,8 @@
 	GAMEPLAYATTRIBUTE_VALUE_SETTER(PropertyName) \
 	GAMEPLAYATTRIBUTE_VALUE_INITTER(PropertyName)
 
+class UVMCharacterHealth;
+
 UCLASS()
 class GASACTIONGAME_API UAGAttributeSetBase : public UAttributeSet
 {
@@ -41,6 +43,9 @@ private:
 	
 	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_MaxMovementSpeed, Category = "GAS|Attributes|Movement", Meta = (AllowPrivateAccess = true))
 	FGameplayAttributeData MaxMovementSpeed;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UVMCharacterHealth> HealthViewModel;
 	
 protected:
 	UFUNCTION()
